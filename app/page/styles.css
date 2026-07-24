@@ -710,6 +710,16 @@ main {
   font-weight: 700;
   letter-spacing: -0.02em;
   margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.admin-logout-btn {
+  font-size: 0.8rem;
+  padding: 0.35rem 0.5rem;
+  line-height: 1;
+  vertical-align: middle;
 }
 
 .section-desc {
@@ -1685,7 +1695,8 @@ main {
   margin-top: 1.5rem;
 }
 
-#client-area-login {
+#client-area-login,
+#admin-login {
   max-width: 28rem;
 }
 
@@ -2046,7 +2057,7 @@ main {
 }
 
 /* ---- Admin Dashboard Responsivo ---- */
-@media (max-width: 768px) {
+@media (max-width: 400px) {
   .admin-dashboard-grid {
     grid-template-columns: 1fr;
   }

@@ -419,33 +419,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Handle admin submenu hashes
     if (hash === "#admin-noticias" || hash === "#admin-mensagens") {
+      // Sem token: redirecionar para o login do admin
+      const storedAdminToken = localStorage.getItem("markosdev_admin_token")
+      if (!storedAdminToken) {
+        window.location.hash = "#admin"
+        return
+      }
+
       // Show admin section
       const adminSection = document.getElementById("admin")
       if (adminSection) {
         adminSection.classList.add("active")
       }
 
-      // Show admin submenu if logged in (check localStorage)
-      const storedAdminToken = localStorage.getItem("markosdev_admin_token")
-      if (storedAdminToken) {
-        const adminSubmenu = document.getElementById("admin-submenu")
-        const adminChevron = document.getElementById("admin-submenu-chevron")
-        if (adminSubmenu) {
-          adminSubmenu.hidden = false
-          adminSubmenu.classList.add("show")
-          if (adminChevron) adminChevron.classList.add("rotate")
-        }
+      // Show admin submenu
+      const adminSubmenu = document.getElementById("admin-submenu")
+      const adminChevron = document.getElementById("admin-submenu-chevron")
+      if (adminSubmenu) {
+        adminSubmenu.hidden = false
+        adminSubmenu.classList.add("show")
+        if (adminChevron) adminChevron.classList.add("rotate")
+      }
 
-        // Switch to the appropriate panel
-        const panelNoticias = document.getElementById("admin-panel-noticias")
-        const panelMensagens = document.getElementById("admin-panel-mensagens")
-        if (hash === "#admin-noticias") {
-          panelNoticias.hidden = false
-          panelMensagens.hidden = true
-        } else if (hash === "#admin-mensagens") {
-          panelNoticias.hidden = true
-          panelMensagens.hidden = false
-          loadAdminClientMessages()
+      // Switch to the appropriate panel
+      const panelNoticias = document.getElementById("admin-panel-noticias")
+      const panelMensagens = document.getElementById("admin-panel-mensagens")
+      if (hash === "#admin-noticias") {
+        panelNoticias.hidden = false
+        panelMensagens.hidden = true
+      } else if (hash === "#admin-mensagens") {
+        panelNoticias.hidden = true
+        panelMensagens.hidden = false
+        if (typeof window.loadAdminClientMessages === "function") {
+          window.loadAdminClientMessages()
         }
       }
     }
@@ -475,6 +481,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Scroll window back to top when switching tab
     window.scrollTo({ top: 0, behavior: "instant" })
   }
+
+  // Expor globalmente para outros scopes (ex: admin panel)
+  window.handleNavigation = handleNavigation
 
   // Listen to hash changes in window
   window.addEventListener("hashchange", handleNavigation)
@@ -952,9 +961,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Toggle do submenu ao clicar no item Admin
   const adminNavItem = document.querySelector('a[href="#admin"].nav-item')
   adminNavItem?.addEventListener("click", (e) => {
-    e.preventDefault()
-    if (!adminToken) return // Não mostrar se não logado
+    if (!adminToken) {
+      // Sem token: permitir navegação natural para #admin (mostra formulário de senha)
+      return
+    }
 
+    e.preventDefault()
     const isOpen = adminSubmenu.classList.contains("show")
     adminSubmenu.classList.toggle("show", !isOpen)
     adminSubmenu.hidden = isOpen
@@ -980,6 +992,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Event listeners para os itens do submenu
   adminSubmenuItems.forEach((item) => {
     item.addEventListener("click", (e) => {
+      if (!adminToken) {
+        e.preventDefault()
+        window.location.hash = "#admin"
+        return
+      }
       const href = item.getAttribute("href")
       if (href === "#admin-noticias") {
         switchAdminPanel("noticias")
@@ -1042,6 +1059,9 @@ document.addEventListener("DOMContentLoaded", () => {
       messagesList.innerHTML = `<p class="admin-empty">Erro ao carregar mensagens.</p>`
     }
   }
+
+  // Expor globalmente para handleNavigation (primeiro DOMContentLoaded)
+  window.loadAdminClientMessages = loadAdminClientMessages
 
   function renderAdminClientMessages(items) {
     if (!items.length) {
@@ -1291,4 +1311,27 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Erro ao excluir notícia.")
     }
   }
+
+  // Logout do painel admin
+  const adminLogoutBtn = document.getElementById("admin-logout-btn")
+  adminLogoutBtn?.addEventListener("click", () => {
+    localStorage.removeItem(ADMIN_PASSWORD_KEY)
+    adminToken = ""
+
+    // Voltar para visualização de login
+    loginSection.hidden = false
+    dashboardSection.hidden = true
+
+    // Fechar submenu na sidebar
+    if (adminSubmenu) {
+      adminSubmenu.hidden = true
+      adminSubmenu.classList.remove("show")
+    }
+    if (adminChevron) adminChevron.classList.remove("rotate")
+
+    // Limpar erro de login
+    loginError.hidden = true
+    loginError.textContent = ""
+    passwordInput.value = ""
+  })
 })

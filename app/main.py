@@ -1,5 +1,3 @@
-# endereço IP: 163.176.237.220 da Oracle Cloud
-
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
