@@ -879,7 +879,7 @@ main {
   color: var(--primary-foreground);
   font-size: 0.875rem;
   font-weight: 500;
-  opacity: 0.6;
+
 }
 
 .btn-primary:disabled {
@@ -1911,6 +1911,7 @@ main {
   color: color-mix(in srgb, var(--foreground) 70%, transparent);
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.4;

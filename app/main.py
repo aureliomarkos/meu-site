@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
@@ -46,6 +46,15 @@ app.mount("/page", StaticFiles(directory="app/page", html=True), name="page")
 @app.get("/", include_in_schema=False)
 def root():
     return RedirectResponse("/page/")
+
+
+@app.get("/download/app", include_in_schema=False)
+def download_app():
+    return FileResponse(
+        path="mobile/meu-site.apk",
+        media_type="application/vnd.android.package-archive",
+        filename="meu-site.apk",
+    )
 
 
 # ── Routers ──────────────────────────────────────────────────────
