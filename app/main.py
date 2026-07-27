@@ -1,13 +1,10 @@
-import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse, FileResponse
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
-
-logger = logging.getLogger("uvicorn.error")
 
 BASE_DIR = Path(__file__).resolve().parent.parent  # raiz do projeto
 
@@ -47,26 +44,12 @@ app.add_middleware(
 # ── Static files ─────────────────────────────────────────────────
 
 app.mount("/page", StaticFiles(directory=str(BASE_DIR / "app" / "page"), html=True), name="page")
+app.mount("/mobile", StaticFiles(directory=str(BASE_DIR / "mobile")), name="mobile")
 
 
 @app.get("/", include_in_schema=False)
 def root():
     return RedirectResponse("/page/")
-
-
-@app.get("/download/app", include_in_schema=False)
-def download_app():
-    apk_path = BASE_DIR / "mobile" / "meu-site.apk"
-    logger.info(f"[download/app] BASE_DIR={BASE_DIR}")
-    logger.info(f"[download/app] resolved={apk_path.resolve()}")
-    logger.info(f"[download/app] exists={apk_path.exists()}")
-    if not apk_path.exists():
-        raise HTTPException(status_code=404, detail=f"APK não encontrado em {apk_path.resolve()}")
-    return FileResponse(
-        path=apk_path,
-        media_type="application/vnd.android.package-archive",
-        filename="meu-site.apk",
-    )
 
 
 # ── Routers ──────────────────────────────────────────────────────
