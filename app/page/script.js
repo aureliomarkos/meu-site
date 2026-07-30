@@ -1129,7 +1129,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <button class="icon-btn contact-detail-btn" data-id="${item.id}" aria-label="Ver detalhe">
             <i data-lucide="eye"></i>
           </button>
-          <button class="icon-btn delete-btn" data-id="${item.id}" aria-label="Excluir">
+          <button class="icon-btn contact-delete-btn" data-id="${item.id}" aria-label="Excluir">
             <i data-lucide="trash-2"></i>
           </button>
         </div>

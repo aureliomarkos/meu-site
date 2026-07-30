@@ -1967,6 +1967,15 @@ main {
   font-size: 0.875rem;
 }
 
+/* ---- Botões de ação Contatos (Admin) ---- */
+.contact-detail-btn {
+  color: #3b82f6;
+}
+
+.contact-delete-btn {
+  color: #ef4444;
+}
+
 /* ============================================
    Modal
 ============================================ */
