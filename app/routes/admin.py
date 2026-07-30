@@ -84,6 +84,28 @@ def admin_delete_news(
     return {"success": True, "message": "Notícia excluída com sucesso"}
 
 
+# ── Mensagens de Contato ─────────────────────────────────────────
+
+@router.get("/contact-messages", response_model=list[schemas.ContactMessageResponse])
+def admin_list_contact_messages(
+    db: Session = Depends(get_db),
+    _: bool = Depends(verify_admin),
+):
+    return crud.list_all_contact_messages_admin(db)
+
+
+@router.delete("/contact-messages/{message_id}")
+def admin_delete_contact_message(
+    message_id: int,
+    db: Session = Depends(get_db),
+    _: bool = Depends(verify_admin),
+):
+    deleted = crud.delete_contact_message(db, message_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Mensagem de contato não encontrada")
+    return {"success": True, "message": "Mensagem de contato excluída com sucesso"}
+
+
 # ── Mensagens dos Clientes ───────────────────────────────────────
 
 @router.get("/client-messages", response_model=list[schemas.AdminClientMessageResponse])

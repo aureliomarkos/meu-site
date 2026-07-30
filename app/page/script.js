@@ -403,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let hash = window.location.hash
     // Default to #inicio if hash is empty or doesn't match an existing section
     // But allow admin submenu hashes (#admin-noticias, #admin-mensagens)
-    const isAdminSubHash = hash === "#admin-noticias" || hash === "#admin-mensagens"
+    const isAdminSubHash = hash === "#admin-noticias" || hash === "#admin-mensagens" || hash === "#admin-contatos"
     if (!hash || (!document.querySelector(hash) && !isAdminSubHash)) {
       hash = "#inicio"
     }
@@ -418,7 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
     })
 
     // Handle admin submenu hashes
-    if (hash === "#admin-noticias" || hash === "#admin-mensagens") {
+    if (hash === "#admin-noticias" || hash === "#admin-mensagens" || hash === "#admin-contatos") {
       // Sem token: redirecionar para o login do admin
       const storedAdminToken = localStorage.getItem("markosdev_admin_token")
       if (!storedAdminToken) {
@@ -444,14 +444,24 @@ document.addEventListener("DOMContentLoaded", () => {
       // Switch to the appropriate panel
       const panelNoticias = document.getElementById("admin-panel-noticias")
       const panelMensagens = document.getElementById("admin-panel-mensagens")
+      const panelContatos = document.getElementById("admin-panel-contatos")
       if (hash === "#admin-noticias") {
         panelNoticias.hidden = false
         panelMensagens.hidden = true
+        panelContatos.hidden = true
       } else if (hash === "#admin-mensagens") {
         panelNoticias.hidden = true
         panelMensagens.hidden = false
+        panelContatos.hidden = true
         if (typeof window.loadAdminClientMessages === "function") {
           window.loadAdminClientMessages()
+        }
+      } else if (hash === "#admin-contatos") {
+        panelNoticias.hidden = true
+        panelMensagens.hidden = true
+        panelContatos.hidden = false
+        if (typeof window.loadAdminContactMessages === "function") {
+          window.loadAdminContactMessages()
         }
       }
     }
@@ -947,8 +957,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Mostrar painel de notícias por padrão
     const panelNoticias = document.getElementById("admin-panel-noticias")
     const panelMensagens = document.getElementById("admin-panel-mensagens")
+    const panelContatos = document.getElementById("admin-panel-contatos")
     if (panelNoticias) panelNoticias.hidden = false
     if (panelMensagens) panelMensagens.hidden = true
+    if (panelContatos) panelContatos.hidden = true
   }
 
   /* ---------- Gerenciar Submenu Admin ---------- */
@@ -957,6 +969,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const adminSubmenuItems = document.querySelectorAll(".submenu-item")
   const panelNoticias = document.getElementById("admin-panel-noticias")
   const panelMensagens = document.getElementById("admin-panel-mensagens")
+  const panelContatos = document.getElementById("admin-panel-contatos")
 
   // Toggle do submenu ao clicar no item Admin
   const adminNavItem = document.querySelector('a[href="#admin"].nav-item')
@@ -977,9 +990,14 @@ document.addEventListener("DOMContentLoaded", () => {
   function switchAdminPanel(panel) {
     panelNoticias.hidden = panel !== "noticias"
     panelMensagens.hidden = panel !== "mensagens"
+    panelContatos.hidden = panel !== "contatos"
 
     if (panel === "mensagens") {
       loadAdminClientMessages()
+    }
+
+    if (panel === "contatos") {
+      loadAdminContactMessages()
     }
 
     // Atualizar active state nos itens do submenu
@@ -1002,6 +1020,8 @@ document.addEventListener("DOMContentLoaded", () => {
         switchAdminPanel("noticias")
       } else if (href === "#admin-mensagens") {
         switchAdminPanel("mensagens")
+      } else if (href === "#admin-contatos") {
+        switchAdminPanel("contatos")
       }
     })
   })
@@ -1062,6 +1082,105 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Expor globalmente para handleNavigation (primeiro DOMContentLoaded)
   window.loadAdminClientMessages = loadAdminClientMessages
+
+  /* ---------- Contatos (Admin) ---------- */
+  const contactList = document.getElementById("admin-contatos-list")
+  const contactDetailModal = document.getElementById("admin-contact-detail-modal")
+  const contactDetailClose = document.getElementById("admin-contact-detail-close")
+  const contactDetailCancel = document.getElementById("admin-contact-detail-cancel")
+  const contactDetailName = document.getElementById("admin-contact-detail-name")
+  const contactDetailEmail = document.getElementById("admin-contact-detail-email")
+  const contactDetailSubject = document.getElementById("admin-contact-detail-subject")
+  const contactDetailBody = document.getElementById("admin-contact-detail-body")
+  const contactDetailDate = document.getElementById("admin-contact-detail-date")
+
+  async function loadAdminContactMessages() {
+    try {
+      const res = await fetch("/api/admin/contact-messages", { headers: getHeaders() })
+      if (!res.ok) throw new Error("Falha ao carregar")
+      const contacts = await res.json()
+      renderAdminContactMessages(contacts)
+    } catch (err) {
+      contactList.innerHTML = `<p class="admin-empty">Erro ao carregar contatos.</p>`
+    }
+  }
+
+  window.loadAdminContactMessages = loadAdminContactMessages
+
+  function renderAdminContactMessages(items) {
+    if (!items.length) {
+      contactList.innerHTML = `<p class="admin-empty">Nenhuma mensagem de contato.</p>`
+      return
+    }
+
+    contactList.innerHTML = ""
+    items.forEach((item) => {
+      const div = document.createElement("div")
+      div.className = "admin-news-item"
+
+      const date = new Date(item.created_at).toLocaleDateString("pt-BR")
+
+      div.innerHTML = `
+        <div class="admin-news-info">
+          <div class="admin-news-title">${item.subject}</div>
+          <div class="admin-news-meta">${item.name} · ${item.email} · ${date} · ID: ${item.id}</div>
+        </div>
+        <div class="admin-news-actions">
+          <button class="icon-btn contact-detail-btn" data-id="${item.id}" aria-label="Ver detalhe">
+            <i data-lucide="eye"></i>
+          </button>
+          <button class="icon-btn delete-btn" data-id="${item.id}" aria-label="Excluir">
+            <i data-lucide="trash-2"></i>
+          </button>
+        </div>
+      `
+
+      div.addEventListener("click", (e) => {
+        if (e.target.closest(".contact-delete-btn")) {
+          deleteContactMessage(item.id)
+        } else if (e.target.closest(".contact-detail-btn")) {
+          openContactDetail(item)
+        }
+      })
+
+      contactList.appendChild(div)
+    })
+
+    if (typeof lucide !== "undefined") lucide.createIcons()
+  }
+
+  function openContactDetail(item) {
+    contactDetailName.textContent = item.name
+    contactDetailEmail.textContent = item.email
+    contactDetailSubject.textContent = item.subject
+    contactDetailBody.textContent = item.message
+    contactDetailDate.textContent = formatAdminDateTime(item.created_at)
+    contactDetailModal.hidden = false
+  }
+
+  function closeContactDetail() {
+    contactDetailModal.hidden = true
+  }
+
+  contactDetailClose?.addEventListener("click", closeContactDetail)
+  contactDetailCancel?.addEventListener("click", closeContactDetail)
+  contactDetailModal?.addEventListener("click", (e) => {
+    if (e.target === contactDetailModal) closeContactDetail()
+  })
+
+  async function deleteContactMessage(id) {
+    if (!confirm("Tem certeza que deseja excluir esta mensagem de contato?")) return
+    try {
+      const res = await fetch(`/api/admin/contact-messages/${id}`, {
+        method: "DELETE",
+        headers: getHeaders(),
+      })
+      if (!res.ok) throw new Error("Erro ao excluir")
+      await loadAdminContactMessages()
+    } catch (err) {
+      alert("Erro ao excluir mensagem de contato.")
+    }
+  }
 
   function renderAdminClientMessages(items) {
     if (!items.length) {

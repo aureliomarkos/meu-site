@@ -1832,7 +1832,8 @@ main {
 }
 
 /* ---- Lista de Mensagens (Admin) ---- */
-.admin-messages-list {
+.admin-messages-list,
+.admin-contatos-list {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;

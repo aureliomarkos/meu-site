@@ -161,6 +161,27 @@ def list_contact_messages(db: Session, skip: int = 0, limit: int = 100):
     )
 
 
+def list_all_contact_messages_admin(db: Session):
+    return (
+        db.query(models.ContactMessage)
+        .order_by(models.ContactMessage.created_at.desc())
+        .all()
+    )
+
+
+def delete_contact_message(db: Session, message_id: int) -> bool:
+    db_message = (
+        db.query(models.ContactMessage)
+        .filter(models.ContactMessage.id == message_id)
+        .first()
+    )
+    if not db_message:
+        return False
+    db.delete(db_message)
+    db.commit()
+    return True
+
+
 def list_news(db: Session, skip: int = 0, limit: int = 5):
     return (
         db.query(models.News)

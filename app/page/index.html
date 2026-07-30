@@ -68,6 +68,11 @@
               </a>
             </li>
             <li>
+              <a href="#admin-contatos" class="submenu-item" data-close-menu>
+                <i data-lucide="contact"></i>Contatos
+              </a>
+            </li>
+            <li>
               <a href="#admin-mensagens" class="submenu-item" data-close-menu>
                 <i data-lucide="mail"></i>Mensagens
               </a>
@@ -411,6 +416,14 @@
               <div id="admin-news-list" class="admin-news-list"></div>
             </div>
 
+            <!-- Sub-seção: Contatos -->
+            <div id="admin-panel-contatos" class="admin-panel" hidden>
+              <div class="admin-toolbar">
+                <h3 class="admin-toolbar-title"><i data-lucide="contact"></i> Contatos</h3>
+              </div>
+              <div id="admin-contatos-list" class="admin-contatos-list"></div>
+            </div>
+
             <!-- Sub-seção: Mensagens dos Clientes -->
             <div id="admin-panel-mensagens" class="admin-panel" hidden>
               <div class="admin-toolbar">
@@ -581,6 +594,43 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal Detalhe Contato (Admin) -->
+  <div id="admin-contact-detail-modal" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Detalhe do Contato</h3>
+        <button id="admin-contact-detail-close" class="icon-btn" aria-label="Fechar">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-form">
+        <div class="form-group">
+          <label>Nome</label>
+          <div class="detail-field" id="admin-contact-detail-name"></div>
+        </div>
+        <div class="form-group">
+          <label>E-mail</label>
+          <div class="detail-field" id="admin-contact-detail-email"></div>
+        </div>
+        <div class="form-group">
+          <label>Assunto</label>
+          <div class="detail-field" id="admin-contact-detail-subject"></div>
+        </div>
+        <div class="form-group">
+          <label>Mensagem</label>
+          <div class="detail-field detail-field-scroll" id="admin-contact-detail-body"></div>
+        </div>
+        <div class="form-group">
+          <label>Data</label>
+          <div class="detail-field" id="admin-contact-detail-date"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="admin-contact-detail-cancel" class="btn bordered">Fechar</button>
+        </div>
+      </div>
     </div>
   </div>
 
