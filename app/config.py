@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     admin_password: str = ""
     openrouter_api_key: str = ""
     openrouter_model: str = ""
+    n8n_webhook_url: str = ""
 
     class Config:
         env_file = ".env"
